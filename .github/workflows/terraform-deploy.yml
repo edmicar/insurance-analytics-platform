@@ -1,0 +1,173 @@
+###############################################################################
+# Insurance Analytics Platform - GitHub Actions CI/CD
+#
+# Este workflow executa:
+# - terraform fmt (validação de formatação)
+# - terraform validate (validação de sintaxe)
+# - terraform plan (preview das mudanças)
+# - terraform apply (deploy - apenas na branch main, com aprovação)
+#
+# CONFIGURAÇÃO DE SECRETS (obrigatório):
+# No GitHub repo → Settings → Secrets and variables → Actions:
+#   - AWS_ACCESS_KEY_ID
+#   - AWS_SECRET_ACCESS_KEY
+#   - AWS_SESSION_TOKEN (se usar credenciais temporárias)
+#
+###############################################################################
+
+name: "Terraform Deploy - Insurance Analytics Platform"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-deploy.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+
+env:
+  TF_VERSION: "1.9.0"
+  AWS_REGION: "us-east-1"
+  TF_WORKING_DIR: "terraform/environments/dev"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 1: Validação (roda em todo push e PR)
+  # ─────────────────────────────────────────────────────────────────────────
+  validate:
+    name: "🔍 Validate Terraform"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        working-directory: terraform/
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -backend=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Post validation results to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `### Terraform Validation Results 🏗️
+
+            | Step | Status |
+            |------|--------|
+            | Format | ${{ steps.fmt.outcome == 'success' && '✅ Passed' || '⚠️ Needs formatting' }} |
+            | Init | ${{ steps.init.outcome == 'success' && '✅ Success' || '❌ Failed' }} |
+            | Validate | ${{ steps.validate.outcome == 'success' && '✅ Valid' || '❌ Invalid' }} |
+
+            *Pushed by: @${{ github.actor }}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 2: Plan (mostra o que será criado/modificado)
+  # ─────────────────────────────────────────────────────────────────────────
+  plan:
+    name: "📋 Terraform Plan"
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false -out=tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Upload Plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 3: Apply (executa o deploy - requer aprovação via environment)
+  # ─────────────────────────────────────────────────────────────────────────
+  apply:
+    name: "🚀 Terraform Apply"
+    runs-on: ubuntu-latest
+    needs: plan
+    environment: production
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Download Plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Show Outputs
+        run: terraform output
+        working-directory: ${{ env.TF_WORKING_DIR }}

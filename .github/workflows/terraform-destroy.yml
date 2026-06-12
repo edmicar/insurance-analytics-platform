@@ -1,0 +1,56 @@
+###############################################################################
+# Insurance Analytics Platform - Destroy Workflow
+#
+# Este workflow é manual (workflow_dispatch) para evitar destruição acidental.
+# Use para limpar recursos após finalizar o estudo.
+###############################################################################
+
+name: "Terraform Destroy - Cleanup Resources"
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Digite DESTROY para confirmar a remoção de todos os recursos'
+        required: true
+        type: string
+
+env:
+  TF_VERSION: "1.9.0"
+  AWS_REGION: "us-east-1"
+  TF_WORKING_DIR: "terraform/environments/dev"
+
+jobs:
+  destroy:
+    name: "💣 Terraform Destroy"
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'DESTROY'
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Confirm Destruction
+        run: |
+          echo "============================================"
+          echo " Todos os recursos foram removidos.        "
+          echo " Custo contínuo: $0.00                     "
+          echo "============================================"
