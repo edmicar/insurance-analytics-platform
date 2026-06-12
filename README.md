@@ -8,29 +8,63 @@
 
 ---
 
+## 📖 A História por trás deste projeto
+
+Era uma segunda-feira qualquer quando Renata, engenheira de dados plena em uma consultoria, recebeu um chamado urgente: a **SeguraTudo**, uma seguradora de médio porte, precisava responder ao regulador em 5 dias — *"Qual o índice de sinistralidade por linha de negócio nos últimos 12 meses?"*
+
+Parecia simples. Não era.
+
+Os dados de apólices viviam no **Guidewire**. Os sinistros, no **Duck Creek**. O financeiro, no **SAP**. Cada sistema exportava CSVs em formatos diferentes — datas como `01/15/2024` em um, `2024-01-15` no outro. O campo de prêmio vinha como `"R$ 15.000,00"` (string com moeda) num lugar e `15000.00` (decimal) em outro. O campo que unia tudo se chamava `PolicyNo` em um e `POLICY_NUMBER` no outro.
+
+Renata tentou resolver no Excel. Fez VLOOKUP, tentou cruzar 500 mil linhas. O Excel travou. Pediu ajuda à TI — que agendou a extração para a semana seguinte. O prazo do regulador já teria passado.
+
+**Aquele dia, Renata prometeu a si mesma: nunca mais.**
+
+Ela estudou o [AWS InsuranceLake Workshop](https://catalog.workshops.aws/workshops/0a85653e-07e9-41a8-960a-2d1bb592331b/en-US), entendeu a arquitetura, e construiu um pipeline que resolve em **5 minutos** o que antes levava **3 semanas**. Mas fez mais do que copiar comandos do workshop — ela entendeu o *porquê* de cada decisão, converteu de CDK para Terraform (o padrão da consultoria), documentou tudo, e expandiu com cenários reais.
+
+**Seis meses depois, Renata foi promovida a Sênior.**
+
+Não porque decorou serviços AWS. Porque sabia explicar *por que* escolheu Step Functions ao invés de Airflow, *quando* DynamoDB é melhor que S3 para lookups, e *como* o Loss Ratio calculado automaticamente muda a tomada de decisão do CFO.
+
+---
+
+## 🎯 Este repositório é a jornada da Renata — para você seguir.
+
+O objetivo é transformar um workshop de 3 horas (que seria esquecido em uma semana) em um **programa de formação** que produz engenheiros seniores capazes de:
+
+- **Entender o problema** antes de escrever código
+- **Projetar** pipelines ETL serverless na AWS
+- **Implementar** infraestrutura como código com Terraform
+- **Decidir** com justificativa de trade-offs (não por moda)
+- **Expandir** soluções com novos casos de uso
+- **Apresentar** e defender decisões tecnicamente para stakeholders
+
+---
+
 ## 📌 Sobre este Repositório
 
-Este é um **repositório educacional** que reimplementa a arquitetura do [AWS InsuranceLake](https://github.com/aws-solutions-library-samples/aws-insurancelake-etl) usando **Terraform** (ao invés do CDK original), com documentação em português voltada para **engenheiros de dados que querem evoluir de Pleno para Sênior**.
+Este é um **repositório educacional** que reimplementa a arquitetura do [AWS InsuranceLake](https://github.com/aws-solutions-library-samples/aws-insurancelake-etl) usando **Terraform** (ao invés do CDK original), com documentação em português voltada para **engenheiros de dados que querem dar o próximo passo**.
 
 O conteúdo não foi criado do zero. É baseado no excelente material open-source da AWS e adaptado com:
 - Conversão de CDK (Python) para Terraform (HCL)
-- Documentação didática em português
+- Documentação didática em português com storytelling
 - Explicações de decisões arquiteturais e trade-offs
 - Casos de uso expandidos para portfólio profissional
 - Mapa mental e raciocínio de negócio para entendimento profundo
 
----
+### Boas Práticas aplicadas neste projeto
 
-## 🎯 Objetivo
-
-Transformar um workshop de 3 horas (que seria esquecido em uma semana) em um **programa de formação** que produz engenheiros seniores capazes de:
-
-- Entender o problema de negócio antes de escrever código
-- Projetar pipelines ETL serverless na AWS
-- Implementar infraestrutura como código com Terraform
-- Tomar decisões arquiteturais com justificativa de trade-offs
-- Expandir soluções com novos casos de uso
-- Apresentar e defender suas decisões tecnicamente
+| Prática | Como foi aplicada |
+|---|---|
+| **Understand before building** | Pasta `reasoning_case/` com problema de negócio, glossário, fluxo |
+| **Infrastructure as Code** | Terraform modularizado com environments separados |
+| **Separation of Concerns** | Módulos por domínio: s3, glue, dynamodb, step-functions |
+| **Documentation as Code** | ADRs, deploy guide, e docs versionados junto com o código |
+| **Security by Default** | KMS encryption, IAM least privilege, public access blocked |
+| **Cost Awareness** | Lifecycle policies, pay-per-request DynamoDB, estimativa documentada |
+| **Observability** | CloudWatch logs, SNS notifications, job audit trail |
+| **Reproducibility** | Dados de exemplo, configs versionadas, terraform plan previsível |
+| **Progressive Learning** | Do problema de negócio → arquitetura → código → expansão |
 
 ---
 
@@ -48,6 +82,39 @@ Este repositório é **baseado integralmente** nos seguintes materiais oficiais 
 | **Well-Architected FSI Lens - Insurance Lake** | https://docs.aws.amazon.com/wellarchitected/latest/financial-services-industry-lens/insurance-lake.html |
 
 > ⚠️ Este repositório NÃO é um produto oficial da AWS. É um material educacional derivado de fontes open-source (licença MIT-0) com valor agregado em documentação, Terraform e didática.
+
+---
+
+## 🧭 Como Seguir esta Jornada (Passo a Passo)
+
+A Renata não fez tudo de uma vez. Ela seguiu uma sequência que respeita como o cérebro aprende:
+
+```
+SEMANA 1 — ENTENDER
+━━━━━━━━━━━━━━━━━━━
+📂 reasoning_case/README.md          → "Qual problema estou resolvendo?"
+📂 reasoning_case/glossario-seguros  → "O que significam esses termos?"
+📂 reasoning_case/fluxo-negocio      → "Como uma seguradora ganha dinheiro?"
+📂 reasoning_case/jornada-dado       → "O que acontece com UM dado no pipeline?"
+
+SEMANA 2 — PROJETAR
+━━━━━━━━━━━━━━━━━━━
+📂 docs/architecture-decisions.md    → "Por que essas escolhas?"
+📂 docs/terraform-vs-cdk.md          → "Por que Terraform e não CDK?"
+📂 reasoning_case/mapa-mental        → "Como tudo se conecta?"
+
+SEMANA 3 — IMPLEMENTAR
+━━━━━━━━━━━━━━━━━━━━━━
+📂 terraform/                        → "terraform init → plan → apply"
+📂 sample-data/                      → "Carregar dados e ver o pipeline rodar"
+📂 docs/deploy-guide.md              → "Passo a passo do deploy"
+
+SEMANA 4+ — EXPANDIR
+━━━━━━━━━━━━━━━━━━━━
+📂 reasoning_case/user-cases-expandidos → "Agora eu crio os meus cenários"
+```
+
+Cada semana constrói sobre a anterior. Se pular direto para o código, vai funcionar — mas não vai aprender. Se seguir a sequência, vai poder explicar cada decisão numa apresentação ou entrevista.
 
 ---
 
@@ -185,12 +252,21 @@ SELECT * FROM syntheticgeneraldata_consume.policydata LIMIT 100;
 
 ## 🎓 Para quem é este repositório?
 
-| Perfil | Como usar |
+| Perfil | Como usar | O que vai ganhar |
+|---|---|---|
+| **Engenheiro Pleno → Sênior** | Siga a jornada semana a semana | Portfólio + profundidade técnica + visão de negócio |
+| **Arquiteto de Soluções** | Analise `docs/architecture-decisions.md` | Referência de ADRs para projetos de data lake |
+| **Tech Lead** | Use como template + adapte ao cliente | Acelerador de onboarding do time |
+| **Estudante** | Fork + implemente os user cases expandidos | Projeto completo para portfólio GitHub |
+
+### O que diferencia quem usa este material
+
+| O que um Pleno faz | O que um Sênior faz |
 |---|---|
-| **Engenheiro Pleno → Sênior** | Estude o `reasoning_case/` primeiro, depois implemente o Terraform |
-| **Arquiteto de Soluções** | Analise as decisões em `docs/architecture-decisions.md` |
-| **Tech Lead** | Use como template para projetos reais de data lake |
-| **Estudante** | Fork e implemente os user cases expandidos como portfólio |
+| "Usei Glue e S3" | "Escolhi Glue porque é serverless e custa $0.44/DPU-hour vs EMR que cobra por hora de cluster, mesmo parado" |
+| "Fiz o pipeline funcionar" | "O pipeline processa 500K linhas em 3 minutos, com data quality rules que quarentenam dados inválidos automaticamente" |
+| "Converti de CDK para Terraform" | "Converti para Terraform porque 90% dos clientes enterprise já usam, e a modularização permite reutilizar o módulo DynamoDB em outros projetos" |
+| "Calculei o Loss Ratio" | "O Loss Ratio automatizado permite ao CFO identificar que o ramo Business está em 81% e precisa de repricing antes do fechamento trimestral" |
 
 ---
 
@@ -234,6 +310,20 @@ Contribuições são bem-vindas! Especialmente:
 - Melhorias na documentação
 - Correções e otimizações no Terraform
 - Traduções de documentação técnica
+
+---
+
+## 💬 A moral da história
+
+A Renata não se tornou Sênior porque sabia mais serviços AWS que os colegas. Ela se tornou Sênior porque:
+
+1. **Entendeu o negócio** — sabia o que é Loss Ratio sem precisar perguntar ao gestor
+2. **Justificou decisões** — não apenas "funciona", mas "funciona por esse motivo, e a alternativa seria X com Y trade-off"
+3. **Pensou em escala** — "e se forem 100 tabelas? e se o regulador pedir outro corte?"
+4. **Documentou** — quem pegasse o projeto depois dela conseguiria entender e evoluir
+5. **Expandiu** — não parou no workshop, criou cenários novos e mostrou autonomia
+
+Este repositório é o mapa que ela seguiu. Agora é o seu.
 
 ---
 
