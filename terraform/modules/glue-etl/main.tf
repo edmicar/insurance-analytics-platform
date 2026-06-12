@@ -119,7 +119,10 @@ resource "aws_glue_job" "collect_to_cleanse" {
     "--enable-continuous-cloudwatch-log"  = "true"
     "--TempDir"                          = "s3://${var.glue_temp_bucket_name}/temp/"
     "--additional-python-modules"        = "rapidfuzz"
+    "--extra-py-files"                   = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/glue_catalog_helpers.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/custom_mapping.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_lookup.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_dataprotection.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_premium.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_misc.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_stringmanipulation.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_typeconversion.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_flatten.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_regulatoryreporting.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquality_helper.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datalineage_helper.py"
     "--environment"                      = var.environment
+    "--source_bucket"                    = var.collect_bucket_name
+    "--target_bucket"                    = var.cleanse_bucket_name
     "--collect_bucket"                   = var.collect_bucket_name
     "--cleanse_bucket"                   = var.cleanse_bucket_name
     "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
@@ -158,7 +161,10 @@ resource "aws_glue_job" "cleanse_to_consume" {
     "--enable-glue-datacatalog"          = "true"
     "--enable-continuous-cloudwatch-log"  = "true"
     "--TempDir"                          = "s3://${var.glue_temp_bucket_name}/temp/"
+    "--extra-py-files"                   = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/glue_catalog_helpers.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/custom_mapping.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_lookup.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_dataprotection.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_premium.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_misc.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_stringmanipulation.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_typeconversion.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_flatten.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_regulatoryreporting.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquality_helper.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datalineage_helper.py"
     "--environment"                      = var.environment
+    "--source_bucket"                    = var.cleanse_bucket_name
+    "--target_bucket"                    = var.consume_bucket_name
     "--cleanse_bucket"                   = var.cleanse_bucket_name
     "--consume_bucket"                   = var.consume_bucket_name
     "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
