@@ -5,6 +5,118 @@
 [![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform)](https://www.terraform.io/)
 [![AWS](https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws)](https://aws.amazon.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
+
+---
+
+## 🧭 Manifesto: Por que este repositório existe
+
+> *"A diferença entre um engenheiro que executa e um que lidera não está no número de ferramentas que conhece — está na profundidade com que entende por que cada ferramenta foi escolhida."*
+
+### O problema com o modelo convencional de aprendizado
+
+O caminho tradicional para formação em dados se parece com isso:
+
+```
+Workshop → Copy/Paste → "Funcionou!" → Esquece em 7 dias → Próximo workshop
+```
+
+A indústria produz **operadores de tutorial**, não engenheiros. Pessoas que sabem rodar `terraform apply` mas não sabem explicar por que Terraform e não Pulumi. Que executam um Glue Job mas não conseguem defender por que não usaram Spark on EMR. Que copiam uma arquitetura mas não sabem dizer qual problema de negócio ela resolve.
+
+**Este repositório existe para quebrar esse ciclo.**
+
+Aqui, o modelo é outro:
+
+```
+Entender o PORQUÊ → Projetar o COMO → Implementar → Questionar → Expandir → Ensinar
+```
+
+---
+
+## 🚀 O Caminho Pleno → Sênior em Data Engineering
+
+A senioridade não é uma promoção que você recebe. É um conjunto de capacidades que você demonstra consistentemente:
+
+### As 6 dimensões de um Data Engineer Sênior
+
+| Dimensão | Pleno faz | Sênior faz |
+|---|---|---|
+| **1. Visão de Negócio** | Recebe requisito técnico e implementa | Traduz problema de negócio em arquitetura de dados |
+| **2. Design de Sistemas** | Usa patterns que viu em cursos | Escolhe patterns com justificativa de trade-offs para o contexto específico |
+| **3. Qualidade** | Testa se funciona | Implementa data quality, observabilidade, e antecipa modos de falha |
+| **4. Escalabilidade** | Faz funcionar para o volume atual | Projeta para 10x sem rewrite, sabe quando otimizar e quando não |
+| **5. Comunicação** | Explica o que fez para outros engenheiros | Apresenta decisões para stakeholders não-técnicos com linguagem de negócio |
+| **6. Autonomia** | Precisa de spec detalhado | Define o approach, divide em etapas, executa, e pede feedback nos pontos certos |
+
+### Habilidades técnicas necessárias para a jornada
+
+```
+FUNDAÇÃO (onde a maioria está)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── SQL (DML, DDL, window functions, CTEs)
+├── Python (scripting, pandas básico)
+├── Cloud basics (S3, EC2, IAM)
+└── Git (commit, push, branch)
+
+INTERMEDIÁRIO (onde este projeto te leva)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── PySpark / Glue (distributed processing)
+├── Terraform (Infrastructure as Code modularizado)
+├── Data Quality (DQDL, Great Expectations, validação automatizada)
+├── Orquestração (Step Functions, Airflow)
+├── Data Modeling (star schema, OBT, Data Vault)
+├── Streaming basics (Kinesis, Kafka concepts)
+└── Observabilidade (CloudWatch, métricas, alertas)
+
+AVANÇADO (para onde você vai depois)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+├── Lakehouse (Iceberg, Delta Lake, Hudi)
+├── Data Mesh / Data Products (DataZone, Unity Catalog)
+├── ML Engineering (feature stores, model serving)
+├── GenAI Integration (RAG, Agents, Bedrock)
+├── FinOps (cost optimization, rightsizing)
+├── Multi-account governance (Organizations, Lake Formation)
+└── Architecture patterns (event-driven, CQRS, saga)
+```
+
+### O que este projeto cobre
+
+```
+✅ Visão de Negócio          → reasoning_case/ (problema real de seguros)
+✅ Design de Sistemas        → docs/architecture-decisions.md (ADRs)
+✅ IaC com Terraform         → terraform/modules/ (modularizado)
+✅ Data Quality              → configs de DQDL (warn/quarantine/halt)
+✅ Orquestração              → Step Functions state machine
+✅ ETL com PySpark           → Glue Jobs (transforms configuráveis)
+✅ Observabilidade           → CloudWatch + SNS + DynamoDB audit
+✅ Segurança                 → KMS, IAM least privilege, PII tokenization
+✅ Comunicação               → Documentação que conta história, não só lista fatos
+```
+
+---
+
+## 💡 A Filosofia: Aprendizado Profundo vs. Tutorial Surface
+
+| Tutorial convencional | Este repositório |
+|---|---|
+| "Rode este comando" | "Este comando cria X, que resolve Y, porque Z" |
+| Copy/paste sem contexto | Entendimento do domínio ANTES do código |
+| Termina quando funciona | Começa quando funciona — agora expanda |
+| Ensina UMA ferramenta | Ensina a PENSAR sobre ferramentas |
+| Objetivo: completar o lab | Objetivo: defender decisões em uma entrevista |
+| Esquece em 7 dias | Internaliza como modelo mental permanente |
+
+### Os 3 pilares deste material
+
+**1. Contexto primeiro, código depois**
+> Antes de escrever `resource "aws_s3_bucket"`, você vai entender o que é Loss Ratio, por que uma seguradora precisa de 3 camadas de dados, e qual o custo de não ter isso automatizado.
+
+**2. Decisões explícitas**
+> Cada escolha técnica tem um ADR (Architecture Decision Record): por que Terraform, por que DynamoDB para lookups, por que Step Functions e não Airflow. Sêniors não fazem escolhas por moda — fazem por contexto.
+
+**3. Expansão como exercício**
+> O workshop base é o ponto de partida. Os 9 user cases expandidos são onde você mostra autonomia: detecção de fraude, pricing dinâmico, streaming, multi-tenant. É aqui que o portfólio se diferencia.
 
 ---
 
