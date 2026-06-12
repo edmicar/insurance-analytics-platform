@@ -1,6 +1,9 @@
 # Pasta de treinamento interno (não subir ao repositório público)
 treinamento/
 
+# Documentação oficial e anotações pessoais (não subir)
+oficial_docs/
+
 # Terraform
 *.tfstate
 *.tfstate.*
