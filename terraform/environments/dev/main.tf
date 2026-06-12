@@ -111,8 +111,10 @@ module "step_functions" {
   environment                 = var.environment
   collect_to_cleanse_job_name = module.glue_etl.collect_to_cleanse_job_name
   cleanse_to_consume_job_name = module.glue_etl.cleanse_to_consume_job_name
+  collect_bucket_name         = module.s3_data_lake.collect_bucket_name
+  cleanse_bucket_name         = module.s3_data_lake.cleanse_bucket_name
+  consume_bucket_name         = module.s3_data_lake.consume_bucket_name
   sns_topic_arn               = aws_sns_topic.pipeline_notifications.arn
-  tags                        = local.tags
 }
 
 # (locals já definido acima junto com KMS)

@@ -10,6 +10,18 @@ variable "cleanse_to_consume_job_name" {
   type = string
 }
 
+variable "collect_bucket_name" {
+  type = string
+}
+
+variable "cleanse_bucket_name" {
+  type = string
+}
+
+variable "consume_bucket_name" {
+  type = string
+}
+
 variable "sns_topic_arn" {
   type = string
 }

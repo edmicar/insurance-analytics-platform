@@ -78,6 +78,8 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
             "--p_month.$"               = "$.month"
             "--p_day.$"                 = "$.day"
             "--execution_id.$"          = "$$.Execution.Name"
+            "--source_bucket"           = var.collect_bucket_name
+            "--target_bucket"           = var.cleanse_bucket_name
           }
         }
         ResultPath = "$.collect_to_cleanse_result"
@@ -104,6 +106,8 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
             "--p_month.$"               = "$.month"
             "--p_day.$"                 = "$.day"
             "--execution_id.$"          = "$$.Execution.Name"
+            "--source_bucket"           = var.cleanse_bucket_name
+            "--target_bucket"           = var.consume_bucket_name
           }
         }
         ResultPath = "$.cleanse_to_consume_result"
