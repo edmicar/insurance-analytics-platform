@@ -1,0 +1,205 @@
+###############################################################################
+# InsuranceLake - AWS Glue ETL Jobs
+# Dois jobs: Collect→Cleanse e Cleanse→Consume
+###############################################################################
+
+# ------------------------------------------------------------------------------
+# IAM Role for Glue Jobs
+# ------------------------------------------------------------------------------
+resource "aws_iam_role" "glue_job_role" {
+  name = "${var.environment}-insurancelake-glue-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "glue.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy" "glue_s3_access" {
+  name = "${var.environment}-insurancelake-glue-s3-policy"
+  role = aws_iam_role.glue_job_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          var.collect_bucket_arn,
+          "${var.collect_bucket_arn}/*",
+          var.cleanse_bucket_arn,
+          "${var.cleanse_bucket_arn}/*",
+          var.consume_bucket_arn,
+          "${var.consume_bucket_arn}/*",
+          var.etl_scripts_bucket_arn,
+          "${var.etl_scripts_bucket_arn}/*",
+          var.glue_temp_bucket_arn,
+          "${var.glue_temp_bucket_arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = var.dynamodb_table_arns
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "glue:GetDatabase",
+          "glue:GetTable",
+          "glue:GetTables",
+          "glue:CreateTable",
+          "glue:UpdateTable",
+          "glue:CreateDatabase",
+          "glue:GetPartitions",
+          "glue:BatchCreatePartition",
+          "glue:BatchDeletePartition"
+        ]
+        Resource = ["*"]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = [var.kms_key_arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = ["arn:aws:logs:*:*:*"]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "glue_service" {
+  role       = aws_iam_role.glue_job_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+}
+
+# ------------------------------------------------------------------------------
+# Glue Job: Collect to Cleanse
+# Schema mapping + Transforms + Data Quality (before/after transform)
+# ------------------------------------------------------------------------------
+resource "aws_glue_job" "collect_to_cleanse" {
+  name     = "${var.environment}-insurancelake-collect-to-cleanse-job"
+  role_arn = aws_iam_role.glue_job_role.arn
+
+  command {
+    name            = "glueetl"
+    script_location = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/collect_to_cleanse.py"
+    python_version  = "3"
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--enable-metrics"                   = "true"
+    "--enable-spark-ui"                  = "true"
+    "--spark-event-logs-path"            = "s3://${var.glue_temp_bucket_name}/spark-logs/"
+    "--enable-glue-datacatalog"          = "true"
+    "--enable-continuous-cloudwatch-log"  = "true"
+    "--TempDir"                          = "s3://${var.glue_temp_bucket_name}/temp/"
+    "--additional-python-modules"        = "rapidfuzz"
+    "--environment"                      = var.environment
+    "--collect_bucket"                   = var.collect_bucket_name
+    "--cleanse_bucket"                   = var.cleanse_bucket_name
+    "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
+    "--glue_temp_bucket"                 = var.glue_temp_bucket_name
+    "--value_lookup_table"               = var.value_lookup_table_name
+    "--multi_lookup_table"               = var.multi_lookup_table_name
+    "--hash_values_table"                = var.hash_values_table_name
+  }
+
+  glue_version      = "4.0"
+  number_of_workers = var.glue_workers
+  worker_type       = var.glue_worker_type
+  timeout           = var.glue_timeout
+
+  tags = merge(var.tags, {
+    Pipeline = "Collect-to-Cleanse"
+  })
+}
+
+# ------------------------------------------------------------------------------
+# Glue Job: Cleanse to Consume
+# Spark SQL (joins/unions) + Data Quality (after_sparksql) + Athena SQL (views)
+# ------------------------------------------------------------------------------
+resource "aws_glue_job" "cleanse_to_consume" {
+  name     = "${var.environment}-insurancelake-cleanse-to-consume-job"
+  role_arn = aws_iam_role.glue_job_role.arn
+
+  command {
+    name            = "glueetl"
+    script_location = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/cleanse_to_consume.py"
+    python_version  = "3"
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--enable-metrics"                   = "true"
+    "--enable-spark-ui"                  = "true"
+    "--spark-event-logs-path"            = "s3://${var.glue_temp_bucket_name}/spark-logs/"
+    "--enable-glue-datacatalog"          = "true"
+    "--enable-continuous-cloudwatch-log"  = "true"
+    "--TempDir"                          = "s3://${var.glue_temp_bucket_name}/temp/"
+    "--environment"                      = var.environment
+    "--cleanse_bucket"                   = var.cleanse_bucket_name
+    "--consume_bucket"                   = var.consume_bucket_name
+    "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
+    "--glue_temp_bucket"                 = var.glue_temp_bucket_name
+  }
+
+  glue_version      = "4.0"
+  number_of_workers = var.glue_workers
+  worker_type       = var.glue_worker_type
+  timeout           = var.glue_timeout
+
+  tags = merge(var.tags, {
+    Pipeline = "Cleanse-to-Consume"
+  })
+}
+
+# ------------------------------------------------------------------------------
+# Glue Catalog Database
+# ------------------------------------------------------------------------------
+resource "aws_glue_catalog_database" "insurancelake" {
+  name = "${var.database_name}"
+
+  description = "InsuranceLake Cleanse layer - curated insurance data"
+}
+
+resource "aws_glue_catalog_database" "insurancelake_consume" {
+  name = "${var.database_name}_consume"
+
+  description = "InsuranceLake Consume layer - analytics-ready insurance data"
+}

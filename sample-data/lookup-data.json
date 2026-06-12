@@ -1,0 +1,27 @@
+{
+    "StateCd": {
+        "SP": "São Paulo",
+        "RJ": "Rio de Janeiro",
+        "MG": "Minas Gerais",
+        "RS": "Rio Grande do Sul",
+        "PR": "Paraná",
+        "BA": "Bahia",
+        "SC": "Santa Catarina",
+        "PE": "Pernambuco",
+        "CE": "Ceará",
+        "DF": "Distrito Federal"
+    },
+    "LineOfBusiness": {
+        "Auto": "Automóvel",
+        "Home": "Residencial",
+        "Business": "Empresarial",
+        "Life": "Vida",
+        "Health": "Saúde"
+    },
+    "ClaimStatus": {
+        "Open": "Em Análise",
+        "Paid": "Pago",
+        "Denied": "Negado",
+        "Closed": "Encerrado"
+    }
+}

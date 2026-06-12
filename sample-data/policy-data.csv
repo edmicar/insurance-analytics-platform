@@ -1,0 +1,11 @@
+PolicyNumber,EffectiveDate,ExpirationDate,WrittenPremiumAmount,EarnedPremium,NewOrRenewal,LineOfBusiness,State,InsuredName
+POL-2024-001,01/15/2024,01/15/2025,12000.00,6000.00,New,Auto,SP,João Silva
+POL-2024-002,02/01/2024,02/01/2025,8500.00,4958.33,Renewal,Auto,RJ,Maria Santos
+POL-2024-003,01/01/2024,01/01/2025,25000.00,12500.00,New,Home,SP,Carlos Oliveira
+POL-2024-004,03/15/2024,03/15/2025,15000.00,6250.00,Renewal,Auto,MG,Ana Costa
+POL-2024-005,01/01/2024,01/01/2025,45000.00,22500.00,New,Business,SP,Tech Solutions Ltda
+POL-2024-006,04/01/2024,04/01/2025,9800.00,3266.67,Renewal,Home,RS,Pedro Ferreira
+POL-2024-007,02/15/2024,02/15/2025,11000.00,5958.33,New,Auto,PR,Lucia Mendes
+POL-2024-008,01/01/2024,01/01/2025,32000.00,16000.00,Renewal,Business,RJ,Empresa ABC SA
+POL-2024-009,05/01/2024,05/01/2025,7500.00,1875.00,New,Auto,BA,Roberto Lima
+POL-2024-010,03/01/2024,03/01/2025,18000.00,6000.00,Renewal,Home,SP,Fernanda Souza
