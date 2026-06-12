@@ -23,8 +23,7 @@ resource "aws_dynamodb_table" "value_lookup" {
   }
 
   server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.kms_key_arn
+    enabled = true
   }
 
   point_in_time_recovery {
@@ -56,8 +55,7 @@ resource "aws_dynamodb_table" "multi_lookup" {
   }
 
   server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.kms_key_arn
+    enabled = true
   }
 
   point_in_time_recovery {
@@ -83,8 +81,7 @@ resource "aws_dynamodb_table" "hash_values" {
   }
 
   server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.kms_key_arn
+    enabled = true
   }
 
   point_in_time_recovery {
@@ -110,8 +107,7 @@ resource "aws_dynamodb_table" "job_audit" {
   }
 
   server_side_encryption {
-    enabled     = true
-    kms_key_arn = var.kms_key_arn
+    enabled = true
   }
 
   ttl {

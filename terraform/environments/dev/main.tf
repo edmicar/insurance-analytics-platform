@@ -40,26 +40,27 @@ data "aws_caller_identity" "current" {}
 
 # ------------------------------------------------------------------------------
 # KMS Key for encryption at rest
+# Nota: Em contas de workshop com SCP restritiva, usamos SSE-S3 (AES256)
+# Em produção real, use KMS customizado para controle granular de acesso
 # ------------------------------------------------------------------------------
-resource "aws_kms_key" "insurancelake" {
-  description             = "InsuranceLake ${var.environment} encryption key"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
+# resource "aws_kms_key" "insurancelake" { ... }
+# Desabilitado para compatibilidade com contas de lab/sandbox
 
-  tags = local.tags
-}
-
-resource "aws_kms_alias" "insurancelake" {
-  name          = "alias/${var.environment}-insurancelake"
-  target_key_id = aws_kms_key.insurancelake.key_id
+locals {
+  # Em produção, use: aws_kms_key.insurancelake.arn
+  # Em lab/sandbox, usamos encryption default do S3 (SSE-S3)
+  kms_key_arn = null
+  tags = {
+    Project     = "InsuranceLake"
+    Environment = var.environment
+  }
 }
 
 # ------------------------------------------------------------------------------
 # SNS Topic for notifications
 # ------------------------------------------------------------------------------
 resource "aws_sns_topic" "pipeline_notifications" {
-  name              = "${var.environment}-insurancelake-notifications"
-  kms_master_key_id = aws_kms_key.insurancelake.id
+  name = "${var.environment}-insurancelake-notifications"
 
   tags = local.tags
 }
@@ -73,7 +74,7 @@ module "s3_data_lake" {
   environment = var.environment
   account_id  = data.aws_caller_identity.current.account_id
   region      = var.region
-  kms_key_arn = aws_kms_key.insurancelake.arn
+  kms_key_arn = local.kms_key_arn
   tags        = local.tags
 }
 
@@ -84,7 +85,7 @@ module "dynamodb" {
   source = "../../modules/dynamodb"
 
   environment = var.environment
-  kms_key_arn = aws_kms_key.insurancelake.arn
+  kms_key_arn = local.kms_key_arn
   tags        = local.tags
 }
 
@@ -95,7 +96,7 @@ module "glue_etl" {
   source = "../../modules/glue-etl"
 
   environment             = var.environment
-  kms_key_arn             = aws_kms_key.insurancelake.arn
+  kms_key_arn             = local.kms_key_arn
   collect_bucket_name     = module.s3_data_lake.collect_bucket_name
   collect_bucket_arn      = module.s3_data_lake.collect_bucket_arn
   cleanse_bucket_name     = module.s3_data_lake.cleanse_bucket_name
@@ -114,7 +115,7 @@ module "glue_etl" {
 }
 
 # ------------------------------------------------------------------------------
-# Module: Step Functions
+# Locals (movido para cima com KMS)
 # ------------------------------------------------------------------------------
 module "step_functions" {
   source = "../../modules/step-functions"
@@ -126,12 +127,4 @@ module "step_functions" {
   tags                        = local.tags
 }
 
-# ------------------------------------------------------------------------------
-# Locals
-# ------------------------------------------------------------------------------
-locals {
-  tags = {
-    Project     = "InsuranceLake"
-    Environment = var.environment
-  }
-}
+# (locals já definido acima junto com KMS)

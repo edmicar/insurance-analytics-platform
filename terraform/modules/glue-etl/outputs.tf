@@ -11,9 +11,9 @@ output "glue_role_arn" {
 }
 
 output "database_name" {
-  value = aws_glue_catalog_database.insurancelake.name
+  value = var.database_name
 }
 
 output "consume_database_name" {
-  value = aws_glue_catalog_database.insurancelake_consume.name
+  value = "${var.database_name}_consume"
 }

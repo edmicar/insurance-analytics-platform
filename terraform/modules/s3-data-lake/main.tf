@@ -30,10 +30,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "collect" {
   bucket = aws_s3_bucket.collect.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = var.kms_key_arn != null ? "aws:kms" : "AES256"
       kms_master_key_id = var.kms_key_arn
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 
@@ -46,16 +46,8 @@ resource "aws_s3_bucket_public_access_block" "collect" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_notification" "collect_notification" {
-  bucket = aws_s3_bucket.collect.id
-
-  lambda_function {
-    lambda_function_arn = var.trigger_lambda_arn
-    events              = ["s3:ObjectCreated:*"]
-  }
-
-  depends_on = [var.trigger_lambda_permission]
-}
+# S3 Notification será configurada após deploy da Lambda
+# resource "aws_s3_bucket_notification" "collect_notification" { ... }
 
 # ------------------------------------------------------------------------------
 # Cleanse Bucket - Dados curados em Parquet, particionados
@@ -80,10 +72,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "cleanse" {
   bucket = aws_s3_bucket.cleanse.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = var.kms_key_arn != null ? "aws:kms" : "AES256"
       kms_master_key_id = var.kms_key_arn
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 
@@ -119,10 +111,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "consume" {
   bucket = aws_s3_bucket.consume.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = var.kms_key_arn != null ? "aws:kms" : "AES256"
       kms_master_key_id = var.kms_key_arn
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 
@@ -151,10 +143,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "etl_scripts" {
   bucket = aws_s3_bucket.etl_scripts.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = var.kms_key_arn != null ? "aws:kms" : "AES256"
       kms_master_key_id = var.kms_key_arn
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 
@@ -196,10 +188,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "glue_temp" {
   bucket = aws_s3_bucket.glue_temp.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
+      sse_algorithm = var.kms_key_arn != null ? "aws:kms" : "AES256"
       kms_master_key_id = var.kms_key_arn
     }
-    bucket_key_enabled = true
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 

@@ -82,14 +82,6 @@ resource "aws_iam_role_policy" "glue_s3_access" {
       {
         Effect = "Allow"
         Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey"
-        ]
-        Resource = [var.kms_key_arn]
-      },
-      {
-        Effect = "Allow"
-        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
@@ -191,15 +183,16 @@ resource "aws_glue_job" "cleanse_to_consume" {
 
 # ------------------------------------------------------------------------------
 # Glue Catalog Database
+# NOTA: Em contas de workshop, a SCP bloqueia glue:CreateDatabase.
+# Os databases são criados automaticamente pelo Glue Job na primeira execução.
+# Em produção, descomente os blocos abaixo:
 # ------------------------------------------------------------------------------
-resource "aws_glue_catalog_database" "insurancelake" {
-  name = "${var.database_name}"
-
-  description = "InsuranceLake Cleanse layer - curated insurance data"
-}
-
-resource "aws_glue_catalog_database" "insurancelake_consume" {
-  name = "${var.database_name}_consume"
-
-  description = "InsuranceLake Consume layer - analytics-ready insurance data"
-}
+# resource "aws_glue_catalog_database" "insurancelake" {
+#   name        = var.database_name
+#   description = "InsuranceLake Cleanse layer - curated insurance data"
+# }
+#
+# resource "aws_glue_catalog_database" "insurancelake_consume" {
+#   name        = "${var.database_name}_consume"
+#   description = "InsuranceLake Consume layer - analytics-ready insurance data"
+# }
