@@ -77,3 +77,15 @@ import {
   to = module.glue_etl.aws_glue_job.cleanse_to_consume
   id = "dev-insurancelake-cleanse-to-consume-job"
 }
+
+# Step Functions State Machine
+import {
+  to = module.step_functions.aws_sfn_state_machine.etl_pipeline
+  id = "arn:aws:states:us-east-1:169459655914:stateMachine:dev-insurancelake-etl-state-machine"
+}
+
+# SNS Topic
+import {
+  to = aws_sns_topic.pipeline_notifications
+  id = "arn:aws:sns:us-east-1:169459655914:dev-insurancelake-notifications"
+}

@@ -121,15 +121,24 @@ resource "aws_glue_job" "collect_to_cleanse" {
     "--additional-python-modules"        = "rapidfuzz"
     "--extra-py-files"                   = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/glue_catalog_helpers.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/custom_mapping.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_lookup.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_dataprotection.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_premium.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_misc.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_stringmanipulation.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_typeconversion.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_structureddata.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquality_check.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datalineage.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquery.py"
     "--environment"                      = var.environment
+    "--txn_bucket"                       = var.etl_scripts_bucket_name
+    "--txn_spec_prefix_path"             = "/etl/transformation-spec/"
+    "--txn_sql_prefix_path"              = "/etl/transformation-sql/"
+    "--txn_dq_prefix_path"               = "/etl/dq-rules/"
     "--source_bucket"                    = var.collect_bucket_name
     "--target_bucket"                    = var.cleanse_bucket_name
-    "--collect_bucket"                   = var.collect_bucket_name
-    "--cleanse_bucket"                   = var.cleanse_bucket_name
-    "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
-    "--glue_temp_bucket"                 = var.glue_temp_bucket_name
+    "--hash_value_table"                 = var.hash_values_table_name
     "--value_lookup_table"               = var.value_lookup_table_name
     "--multi_lookup_table"               = var.multi_lookup_table_name
-    "--hash_values_table"                = var.hash_values_table_name
+    "--dq_results_table"                 = "${var.environment}-insurancelake-etl-dq-results"
+    "--state_machine_name"               = "${var.environment}-insurancelake-etl-state-machine"
+    "--execution_id"                     = "default"
+    "--source_path"                      = ""
+    "--target_database_name"             = ""
+    "--base_file_name"                   = ""
+    "--p_year"                           = ""
+    "--p_month"                          = ""
+    "--p_day"                            = ""
   }
 
   glue_version      = "4.0"
@@ -163,12 +172,24 @@ resource "aws_glue_job" "cleanse_to_consume" {
     "--TempDir"                          = "s3://${var.glue_temp_bucket_name}/temp/"
     "--extra-py-files"                   = "s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/glue_catalog_helpers.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/custom_mapping.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_lookup.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_dataprotection.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_premium.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_misc.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_stringmanipulation.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_typeconversion.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datatransform_structureddata.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquality_check.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/datalineage.py,s3://${var.etl_scripts_bucket_name}/etl/glue-scripts/lib/dataquery.py"
     "--environment"                      = var.environment
+    "--txn_bucket"                       = var.etl_scripts_bucket_name
+    "--txn_spec_prefix_path"             = "/etl/transformation-spec/"
+    "--txn_sql_prefix_path"              = "/etl/transformation-sql/"
+    "--txn_dq_prefix_path"               = "/etl/dq-rules/"
     "--source_bucket"                    = var.cleanse_bucket_name
     "--target_bucket"                    = var.consume_bucket_name
-    "--cleanse_bucket"                   = var.cleanse_bucket_name
-    "--consume_bucket"                   = var.consume_bucket_name
-    "--etl_scripts_bucket"               = var.etl_scripts_bucket_name
-    "--glue_temp_bucket"                 = var.glue_temp_bucket_name
+    "--hash_value_table"                 = var.hash_values_table_name
+    "--value_lookup_table"               = var.value_lookup_table_name
+    "--multi_lookup_table"               = var.multi_lookup_table_name
+    "--dq_results_table"                 = "${var.environment}-insurancelake-etl-dq-results"
+    "--state_machine_name"               = "${var.environment}-insurancelake-etl-state-machine"
+    "--execution_id"                     = "default"
+    "--source_path"                      = ""
+    "--target_database_name"             = ""
+    "--base_file_name"                   = ""
+    "--p_year"                           = ""
+    "--p_month"                          = ""
+    "--p_day"                            = ""
   }
 
   glue_version      = "4.0"

@@ -53,13 +53,13 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
         Parameters = {
           JobName = var.collect_to_cleanse_job_name
           Arguments = {
-            "--source_bucket.$"  = "$.source_bucket"
-            "--source_key.$"     = "$.source_key"
-            "--database_name.$"  = "$.database_name"
-            "--table_name.$"     = "$.table_name"
-            "--year.$"           = "$.year"
-            "--month.$"          = "$.month"
-            "--day.$"            = "$.day"
+            "--source_path.$"           = "$.source_key"
+            "--target_database_name.$"  = "$.database_name"
+            "--base_file_name.$"        = "$.source_key"
+            "--p_year.$"                = "$.year"
+            "--p_month.$"               = "$.month"
+            "--p_day.$"                 = "$.day"
+            "--execution_id.$"          = "$$.Execution.Name"
           }
         }
         ResultPath = "$.collect_to_cleanse_result"
@@ -77,11 +77,13 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
         Parameters = {
           JobName = var.cleanse_to_consume_job_name
           Arguments = {
-            "--database_name.$" = "$.database_name"
-            "--table_name.$"    = "$.table_name"
-            "--year.$"          = "$.year"
-            "--month.$"         = "$.month"
-            "--day.$"           = "$.day"
+            "--source_path.$"           = "$.source_key"
+            "--target_database_name.$"  = "$.database_name"
+            "--base_file_name.$"        = "$.source_key"
+            "--p_year.$"                = "$.year"
+            "--p_month.$"               = "$.month"
+            "--p_day.$"                 = "$.day"
+            "--execution_id.$"          = "$$.Execution.Name"
           }
         }
         ResultPath = "$.cleanse_to_consume_result"
