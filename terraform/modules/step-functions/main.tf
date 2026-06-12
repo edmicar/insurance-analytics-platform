@@ -45,8 +45,24 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
 
   definition = jsonencode({
     Comment = "InsuranceLake ETL Pipeline"
-    StartAt = "CollectToCleanse"
+    StartAt = "PrepareInput"
     States = {
+      PrepareInput = {
+        Type = "Pass"
+        Parameters = {
+          "source_bucket.$"       = "$.source_bucket"
+          "source_key.$"          = "$.source_key"
+          "database_name.$"       = "$.database_name"
+          "table_name.$"          = "$.table_name"
+          "year.$"                = "$.year"
+          "month.$"               = "$.month"
+          "day.$"                 = "$.day"
+          "base_file_name.$"      = "$.source_key"
+          "source_path.$"         = "$.database_name"
+        }
+        Next = "CollectToCleanse"
+      }
+
       CollectToCleanse = {
         Type     = "Task"
         Resource = "arn:aws:states:::glue:startJobRun.sync"
@@ -54,7 +70,7 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
           JobName = var.collect_to_cleanse_job_name
           Arguments = {
             "--source_key.$"            = "$.source_key"
-            "--source_path.$"           = "$.database_name"
+            "--source_path.$"           = "$.source_path"
             "--target_database_name.$"  = "$.database_name"
             "--table_name.$"            = "$.table_name"
             "--base_file_name.$"        = "$.base_file_name"
@@ -80,7 +96,7 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
           JobName = var.cleanse_to_consume_job_name
           Arguments = {
             "--source_key.$"            = "$.source_key"
-            "--source_path.$"           = "$.database_name"
+            "--source_path.$"           = "$.source_path"
             "--target_database_name.$"  = "$.database_name"
             "--table_name.$"            = "$.table_name"
             "--base_file_name.$"        = "$.base_file_name"
