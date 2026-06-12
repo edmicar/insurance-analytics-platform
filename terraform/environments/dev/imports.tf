@@ -66,3 +66,14 @@ import {
   to = module.dynamodb.aws_dynamodb_table.job_audit
   id = "dev-insurancelake-etl-job-audit"
 }
+
+# Glue Jobs
+import {
+  to = module.glue_etl.aws_glue_job.collect_to_cleanse
+  id = "dev-insurancelake-collect-to-cleanse-job"
+}
+
+import {
+  to = module.glue_etl.aws_glue_job.cleanse_to_consume
+  id = "dev-insurancelake-cleanse-to-consume-job"
+}
