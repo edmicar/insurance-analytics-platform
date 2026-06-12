@@ -171,3 +171,24 @@ jobs:
       - name: Show Outputs
         run: terraform output
         working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Sync ETL Scripts from AWS InsuranceLake repo
+        run: |
+          echo "Cloning AWS InsuranceLake ETL repository..."
+          git clone --depth 1 https://github.com/aws-solutions-library-samples/aws-insurancelake-etl.git /tmp/insurancelake-etl
+
+          ETL_BUCKET="dev-insurancelake-etl-scripts"
+
+          echo "Uploading Glue PySpark scripts..."
+          aws s3 cp /tmp/insurancelake-etl/lib/glue_scripts/etl_collect_to_cleanse.py s3://$ETL_BUCKET/etl/glue-scripts/collect_to_cleanse.py
+          aws s3 cp /tmp/insurancelake-etl/lib/glue_scripts/etl_cleanse_to_consume.py s3://$ETL_BUCKET/etl/glue-scripts/cleanse_to_consume.py
+
+          echo "Uploading transform libraries..."
+          aws s3 sync /tmp/insurancelake-etl/lib/glue_scripts/lib s3://$ETL_BUCKET/etl/glue-scripts/lib/ --quiet
+
+          echo "Uploading ETL configurations..."
+          aws s3 sync /tmp/insurancelake-etl/lib/glue_scripts/transformation-spec s3://$ETL_BUCKET/etl/transformation-spec/ --quiet
+          aws s3 sync /tmp/insurancelake-etl/lib/glue_scripts/dq-rules s3://$ETL_BUCKET/etl/dq-rules/ --quiet
+          aws s3 sync /tmp/insurancelake-etl/lib/glue_scripts/transformation-sql s3://$ETL_BUCKET/etl/transformation-sql/ --quiet
+
+          echo "ETL scripts synced successfully!"
