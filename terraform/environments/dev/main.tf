@@ -25,15 +25,6 @@ terraform {
 
 provider "aws" {
   region = var.region
-
-  default_tags {
-    tags = {
-      Project     = "InsuranceLake"
-      Environment = var.environment
-      ManagedBy   = "Terraform"
-      Repository  = "insurance-analytics-platform"
-    }
-  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -61,8 +52,6 @@ locals {
 # ------------------------------------------------------------------------------
 resource "aws_sns_topic" "pipeline_notifications" {
   name = "${var.environment}-insurancelake-notifications"
-
-  tags = local.tags
 }
 
 # ------------------------------------------------------------------------------
@@ -75,7 +64,6 @@ module "s3_data_lake" {
   account_id  = data.aws_caller_identity.current.account_id
   region      = var.region
   kms_key_arn = local.kms_key_arn
-  tags        = local.tags
 }
 
 # ------------------------------------------------------------------------------

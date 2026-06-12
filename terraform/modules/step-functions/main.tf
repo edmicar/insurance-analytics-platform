@@ -1,14 +1,50 @@
 ###############################################################################
 # InsuranceLake - Step Functions State Machine
-# Orquestra: Collect→Cleanse → Cleanse→Consume → Audit → Notify
+# Orquestra: Collect→Cleanse → Cleanse→Consume → Notify
 ###############################################################################
+
+resource "aws_iam_role" "step_functions_role" {
+  name = "${var.environment}-insurancelake-sfn-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "states.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "step_functions_policy" {
+  name = "${var.environment}-insurancelake-sfn-policy"
+  role = aws_iam_role.step_functions_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["glue:StartJobRun", "glue:GetJobRun", "glue:GetJobRuns", "glue:BatchStopJobRun"]
+        Resource = ["*"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["sns:Publish"]
+        Resource = [var.sns_topic_arn]
+      }
+    ]
+  })
+}
 
 resource "aws_sfn_state_machine" "etl_pipeline" {
   name     = "${var.environment}-insurancelake-etl-state-machine"
   role_arn = aws_iam_role.step_functions_role.arn
 
   definition = jsonencode({
-    Comment = "InsuranceLake ETL Pipeline - Orchestrates Collect→Cleanse→Consume"
+    Comment = "InsuranceLake ETL Pipeline"
     StartAt = "CollectToCleanse"
     States = {
       CollectToCleanse = {
@@ -17,13 +53,13 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
         Parameters = {
           JobName = var.collect_to_cleanse_job_name
           Arguments = {
-            "--source_bucket.$"    = "$.source_bucket"
-            "--source_key.$"       = "$.source_key"
-            "--database_name.$"    = "$.database_name"
-            "--table_name.$"       = "$.table_name"
-            "--year.$"             = "$.year"
-            "--month.$"            = "$.month"
-            "--day.$"              = "$.day"
+            "--source_bucket.$"  = "$.source_bucket"
+            "--source_key.$"     = "$.source_key"
+            "--database_name.$"  = "$.database_name"
+            "--table_name.$"     = "$.table_name"
+            "--year.$"           = "$.year"
+            "--month.$"          = "$.month"
+            "--day.$"            = "$.day"
           }
         }
         ResultPath = "$.collect_to_cleanse_result"
@@ -58,23 +94,23 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
       }
 
       PipelineSucceeded = {
-        Type = "Task"
+        Type     = "Task"
         Resource = "arn:aws:states:::sns:publish"
         Parameters = {
-          TopicArn = var.sns_topic_arn
-          Subject  = "InsuranceLake ETL Pipeline Succeeded"
+          TopicArn    = var.sns_topic_arn
+          Subject     = "InsuranceLake ETL Succeeded"
           "Message.$" = "States.Format('Pipeline completed for {}/{}', $.database_name, $.table_name)"
         }
         End = true
       }
 
       PipelineFailed = {
-        Type = "Task"
+        Type     = "Task"
         Resource = "arn:aws:states:::sns:publish"
         Parameters = {
-          TopicArn = var.sns_topic_arn
-          Subject  = "InsuranceLake ETL Pipeline FAILED"
-          "Message.$" = "States.Format('Pipeline FAILED for {}/{}. Error: {}', $.database_name, $.table_name, $.error)"
+          TopicArn    = var.sns_topic_arn
+          Subject     = "InsuranceLake ETL FAILED"
+          "Message.$" = "States.Format('FAILED for {}/{}', $.database_name, $.table_name)"
         }
         Next = "FailState"
       }
@@ -82,53 +118,8 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
       FailState = {
         Type  = "Fail"
         Error = "PipelineExecutionFailed"
-        Cause = "One or more ETL steps failed. Check CloudWatch logs."
+        Cause = "ETL step failed. Check CloudWatch logs."
       }
     }
-  })
-
-  tags = merge(var.tags, {
-    Purpose = "ETL pipeline orchestration"
-  })
-}
-
-# ------------------------------------------------------------------------------
-# IAM Role for Step Functions
-# ------------------------------------------------------------------------------
-resource "aws_iam_role" "step_functions_role" {
-  name = "${var.environment}-insurancelake-sfn-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "states.amazonaws.com"
-      }
-    }]
-  })
-
-  tags = var.tags
-}
-
-resource "aws_iam_role_policy" "step_functions_policy" {
-  name = "${var.environment}-insurancelake-sfn-policy"
-  role = aws_iam_role.step_functions_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = ["glue:StartJobRun", "glue:GetJobRun", "glue:GetJobRuns", "glue:BatchStopJobRun"]
-        Resource = ["*"]
-      },
-      {
-        Effect   = "Allow"
-        Action   = ["sns:Publish"]
-        Resource = [var.sns_topic_arn]
-      }
-    ]
   })
 }

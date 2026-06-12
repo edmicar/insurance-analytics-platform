@@ -21,8 +21,6 @@ resource "aws_iam_role" "glue_job_role" {
       }
     ]
   })
-
-  tags = var.tags
 }
 
 resource "aws_iam_role_policy" "glue_s3_access" {
@@ -135,10 +133,6 @@ resource "aws_glue_job" "collect_to_cleanse" {
   number_of_workers = var.glue_workers
   worker_type       = var.glue_worker_type
   timeout           = var.glue_timeout
-
-  tags = merge(var.tags, {
-    Pipeline = "Collect-to-Cleanse"
-  })
 }
 
 # ------------------------------------------------------------------------------
@@ -175,10 +169,6 @@ resource "aws_glue_job" "cleanse_to_consume" {
   number_of_workers = var.glue_workers
   worker_type       = var.glue_worker_type
   timeout           = var.glue_timeout
-
-  tags = merge(var.tags, {
-    Pipeline = "Cleanse-to-Consume"
-  })
 }
 
 # ------------------------------------------------------------------------------

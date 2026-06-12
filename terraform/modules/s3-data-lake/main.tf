@@ -12,11 +12,6 @@ locals {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "collect" {
   bucket = "${local.bucket_prefix}-collect"
-
-  tags = merge(var.tags, {
-    Layer = "Collect"
-    Purpose = "Raw source data in original format"
-  })
 }
 
 resource "aws_s3_bucket_versioning" "collect" {
@@ -54,11 +49,6 @@ resource "aws_s3_bucket_public_access_block" "collect" {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "cleanse" {
   bucket = "${local.bucket_prefix}-cleanse"
-
-  tags = merge(var.tags, {
-    Layer = "Cleanse"
-    Purpose = "Curated data in Parquet format with schema mapping and transforms applied"
-  })
 }
 
 resource "aws_s3_bucket_versioning" "cleanse" {
@@ -93,11 +83,6 @@ resource "aws_s3_bucket_public_access_block" "cleanse" {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "consume" {
   bucket = "${local.bucket_prefix}-consume"
-
-  tags = merge(var.tags, {
-    Layer = "Consume"
-    Purpose = "Analytics-ready data for BI tools and SQL queries"
-  })
 }
 
 resource "aws_s3_bucket_versioning" "consume" {
@@ -132,11 +117,6 @@ resource "aws_s3_bucket_public_access_block" "consume" {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "etl_scripts" {
   bucket = "${var.environment}-insurancelake-etl-scripts"
-
-  tags = merge(var.tags, {
-    Layer = "Configuration"
-    Purpose = "ETL transformation specs, SQL files, data quality rules"
-  })
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "etl_scripts" {
@@ -164,11 +144,6 @@ resource "aws_s3_bucket_public_access_block" "etl_scripts" {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "glue_temp" {
   bucket = "${local.bucket_prefix}-glue-temp"
-
-  tags = merge(var.tags, {
-    Layer = "Temporary"
-    Purpose = "Glue job temp files and auto-generated recommendations"
-  })
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "glue_temp" {
@@ -177,6 +152,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "glue_temp" {
   rule {
     id     = "cleanup-temp-files"
     status = "Enabled"
+
+    filter {}
 
     expiration {
       days = 30
@@ -209,11 +186,6 @@ resource "aws_s3_bucket_public_access_block" "glue_temp" {
 # ------------------------------------------------------------------------------
 resource "aws_s3_bucket" "access_logs" {
   bucket = "${local.bucket_prefix}-access-logs"
-
-  tags = merge(var.tags, {
-    Layer = "Logging"
-    Purpose = "S3 server access logs for auditing"
-  })
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
@@ -222,6 +194,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "access_logs" {
   rule {
     id     = "archive-old-logs"
     status = "Enabled"
+
+    filter {}
 
     transition {
       days          = 90
