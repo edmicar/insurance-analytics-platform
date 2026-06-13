@@ -125,8 +125,8 @@ resource "aws_glue_job" "collect_to_cleanse" {
     "--txn_spec_prefix_path"             = "/etl/transformation-spec/"
     "--txn_sql_prefix_path"              = "/etl/transformation-sql/"
     "--txn_dq_prefix_path"               = "/etl/dq-rules/"
-    "--source_bucket"                    = var.collect_bucket_name
-    "--target_bucket"                    = var.cleanse_bucket_name
+    "--source_bucket"                    = "s3://${var.collect_bucket_name}"
+    "--target_bucket"                    = "s3://${var.cleanse_bucket_name}"
     "--hash_value_table"                 = var.hash_values_table_name
     "--value_lookup_table"               = var.value_lookup_table_name
     "--multi_lookup_table"               = var.multi_lookup_table_name
@@ -178,8 +178,8 @@ resource "aws_glue_job" "cleanse_to_consume" {
     "--txn_spec_prefix_path"             = "/etl/transformation-spec/"
     "--txn_sql_prefix_path"              = "/etl/transformation-sql/"
     "--txn_dq_prefix_path"               = "/etl/dq-rules/"
-    "--source_bucket"                    = var.cleanse_bucket_name
-    "--target_bucket"                    = var.consume_bucket_name
+    "--source_bucket"                    = "s3://${var.cleanse_bucket_name}"
+    "--target_bucket"                    = "s3://${var.consume_bucket_name}"
     "--hash_value_table"                 = var.hash_values_table_name
     "--value_lookup_table"               = var.value_lookup_table_name
     "--multi_lookup_table"               = var.multi_lookup_table_name
