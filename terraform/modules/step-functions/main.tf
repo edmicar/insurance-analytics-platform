@@ -54,7 +54,7 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
           JobName = var.collect_to_cleanse_job_name
           Arguments = {
             "--source_key.$"            = "$.source_key"
-            "--source_path"             = ""
+            "--source_path.$"           = "$.source_key"
             "--target_database_name.$"  = "$.database_name"
             "--table_name.$"            = "$.table_name"
             "--base_file_name.$"        = "$.source_key"
@@ -82,7 +82,7 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
           JobName = var.cleanse_to_consume_job_name
           Arguments = {
             "--source_key.$"            = "$.source_key"
-            "--source_path"             = ""
+            "--source_path.$"           = "$.source_key"
             "--target_database_name.$"  = "$.database_name"
             "--table_name.$"            = "$.table_name"
             "--base_file_name.$"        = "$.source_key"
