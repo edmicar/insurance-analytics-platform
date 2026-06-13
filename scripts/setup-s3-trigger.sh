@@ -141,6 +141,7 @@ def lambda_handler(event, context):
             "source_key": key,
             "database_name": database_name.lower(),
             "table_name": table_name.lower(),
+            "source_path": f"{database_name}/{table_name}",
             "base_file_name": parts[-1],
             "year": year,
             "month": month,

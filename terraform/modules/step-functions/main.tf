@@ -57,8 +57,6 @@ resource "aws_sfn_state_machine" "etl_pipeline" {
           "year.$"                = "$.year"
           "month.$"               = "$.month"
           "day.$"                 = "$.day"
-          "base_file_name.$"      = "$.source_key"
-          "source_path.$"         = "$.database_name"
         }
         Next = "CollectToCleanse"
       }
