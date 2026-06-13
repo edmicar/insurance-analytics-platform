@@ -10,7 +10,7 @@
 
 ---
 
-## 🧭 Manifesto: Por que este repositório existe
+## 🧭 Manifesto: Por que este repositório existe!
 
 > *"A diferença entre um engenheiro que executa e um que lidera não está no número de ferramentas que conhece — está na profundidade com que entende por que cada ferramenta foi escolhida."*
 
