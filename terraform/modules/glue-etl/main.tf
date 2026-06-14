@@ -187,7 +187,7 @@ resource "aws_glue_job" "cleanse_to_consume" {
     "--state_machine_name"               = "${var.environment}-insurancelake-etl-state-machine"
     "--execution_id"                     = "default"
     "--source_key"                       = "placeholder"
-    "--source_path"                      = "placeholder"
+    "--source_database_name"             = "placeholder"
     "--target_database_name"             = "placeholder"
     "--table_name"                       = "placeholder"
     "--base_file_name"                   = "placeholder"
